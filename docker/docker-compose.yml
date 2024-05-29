@@ -1,0 +1,28 @@
+# docker/docker-compose.yml
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo
+    container_name: mongo
+    volumes:
+      - '../data:/data/db'
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: 123
+
+    ports:
+      - "27017:27017"
+
+  bot:
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile
+    container_name: telegram-bot
+    env_file:
+      - ../config/.env
+    depends_on:
+      - mongo
+
+volumes:
+  mongo-data:
