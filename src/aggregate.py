@@ -20,6 +20,9 @@ collection = db[COLLECTION_NAME]
 
 
 async def aggregate_data(dt_from, dt_upto, group_type):
+    dt_from = datetime.datetime.fromisoformat(dt_from)
+    dt_upto = datetime.datetime.fromisoformat(dt_upto)
+
 
     logging.info(f"----------{dt_from,dt_upto,group_type}")
     group_format = {
@@ -37,15 +40,15 @@ async def aggregate_data(dt_from, dt_upto, group_type):
             "_id": {"$dateToString": {"format": group_format, "date": "$dt"}},
             "total": {"$sum": "$value"}
         }},
-        #{"$sort": {"_id": 1}}
+        {"$sort": {"_id": 1}}
     ]
     pipeline_all = [
         {"$match": {}}
     ]
 
-    result = collection.aggregate(pipeline_all)#.to_list(length=100)
+    result = await collection.aggregate(pipeline).to_list(length=None)
     logging.info(f"----------------{result}")
     dataset = [item['total'] for item in result]
     labels = [item['_id'] for item in result]
 
-    return {"dataset": dataset, "labels": labels}
+    return {"dataset": [dataset], "labels": [labels]}

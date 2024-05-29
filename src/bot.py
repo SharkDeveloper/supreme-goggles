@@ -32,7 +32,7 @@ async def handle_message(message: types.Message):
         group_type = input_data["group_type"]
 
         result = await aggregate_data(dt_from, dt_upto, group_type)
-        await message.reply(json.dumps(result, indent=4), parse_mode=ParseMode.MARKDOWN)
+        await message.reply(result, parse_mode=ParseMode.MARKDOWN)
     except Exception as e:
         await message.reply(f"Error: {str(e)}")
 
