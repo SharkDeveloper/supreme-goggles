@@ -48,7 +48,28 @@ async def aggregate_data(dt_from, dt_upto, group_type):
 
     result = await collection.aggregate(pipeline).to_list(length=None)
     logging.info(f"----------------{result}")
-    dataset = [item['total'] for item in result]
-    labels = [item['_id'] for item in result]
+
+
+    current = dt_from
+    all_dates = []
+    while current <= dt_upto:
+        all_dates.append(current.strftime(group_format))
+        if group_type == 'hour':
+            current += datetime.timedelta(hours=1)
+        elif group_type == 'day':
+            current += datetime.timedelta(days=1)
+        elif group_type == 'month':
+            next_month = current.month % 12 + 1
+            year = current.year + (current.month + 1 > 12)
+            current = current.replace(year=year, month=next_month, day=1)
+
+
+    data_dict = {date: 0 for date in all_dates}
+
+    for item in result:
+        data_dict[item['_id']] = item['total']
+
+    dataset = list(data_dict.values())
+    labels = list(data_dict.keys())
 
     return {"dataset": [dataset], "labels": [labels]}
